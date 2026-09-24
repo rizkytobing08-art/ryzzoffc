@@ -1,10 +1,6 @@
 const $ = id => document.getElementById(id);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// ===== Konfigurasi komentar bersama (isi setelah setup Supabase, lihat panduan) =====
-const SB_URL = "";   // contoh: "https://abcd1234.supabase.co"
-const SB_KEY = "";   // anon public key
-
 // ===== Halaman (navigasi tanpa reload) =====
 const pages = [...document.querySelectorAll("main>section")];
 function route() {
@@ -67,30 +63,29 @@ const lb = $("lb");
 document.querySelectorAll("[data-full]").forEach(b => b.addEventListener("click", () => { lb.querySelector("img").src = b.dataset.full; lb.showModal(); }));
 lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
 
-// ===== Komentar dan rating =====
-const online = SB_URL && SB_KEY;
-const HD = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY, "Content-Type": "application/json" };
+// ===== Komentar dan rating (lewat /api/comments) =====
 const local = () => { try { return JSON.parse(localStorage.getItem("cm") || "[]"); } catch { return []; } };
 async function load() {
-  if (!online) return local();
-  const r = await fetch(SB_URL + "/rest/v1/comments?select=*&order=created_at.desc&limit=100", { headers: HD });
-  if (!r.ok) throw 0; return r.json();
+  const r = await fetch("/api/comments", { cache: "no-store" });
+  if (!r.ok) throw 0;
+  const d = await r.json();
+  $("demo").hidden = !d.demo;
+  return d.demo ? local() : d.items;
 }
 async function save(c) {
-  if (online) {
-    const r = await fetch(SB_URL + "/rest/v1/comments", { method: "POST", headers: { ...HD, Prefer: "return=minimal" }, body: JSON.stringify(c) });
-    if (!r.ok) throw 0;
-  } else localStorage.setItem("cm", JSON.stringify([{ ...c, created_at: new Date().toISOString() }, ...local()]));
+  const r = await fetch("/api/comments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(c) });
+  if (r.status === 503) localStorage.setItem("cm", JSON.stringify([{ ...c, at: Date.now() }, ...local()]));
+  else if (r.status === 429) throw "slow";
+  else if (!r.ok) throw 0;
 }
-$("demo").hidden = !!online;
-$("stars").innerHTML = [5, 4, 3, 2, 1].map(v => `<input type="radio" name="r" id="r${v}" value="${v}" required><label for="r${v}" title="${v} bintang"><span aria-hidden="true">★</span><span class="sr" style="position:absolute;left:-9999px">${v} bintang</span></label>`).join("");
+$("stars").innerHTML = [5, 4, 3, 2, 1].map(v => `<input type="radio" name="r" id="r${v}" value="${v}" required aria-label="${v} bintang"><label for="r${v}" title="${v} bintang">★</label>`).join("");
 async function render() {
   let a = []; try { a = await load(); } catch { $("msg").textContent = "Komentar belum bisa dimuat."; }
   $("sum").textContent = a.length ? `★ ${(a.reduce((s, c) => s + c.rating, 0) / a.length).toFixed(1)} dari 5 (${a.length} rating)` : "Belum ada rating. Jadilah yang pertama!";
   $("list").replaceChildren(...a.map(c => {
     const d = document.createElement("div"), h = document.createElement("b"), s = document.createElement("small"), p = document.createElement("p");
     d.className = "cm"; h.textContent = c.name; p.textContent = c.message;
-    s.textContent = "★".repeat(c.rating) + "☆".repeat(5 - c.rating) + "  " + new Date(c.created_at).toLocaleDateString("id-ID");
+    s.textContent = "★".repeat(c.rating) + "☆".repeat(5 - c.rating) + "  " + new Date(c.at).toLocaleDateString("id-ID");
     d.append(h, s, p); return d;
   }));
 }
@@ -101,6 +96,6 @@ $("form").addEventListener("submit", async e => {
   try {
     await save({ name: $("nm").value.trim(), message: $("tx").value.trim(), rating: +e.target.r.value });
     localStorage.setItem("last", Date.now()); e.target.reset(); say("Terima kasih! Komentarmu sudah terkirim."); render();
-  } catch { say("Gagal mengirim. Coba lagi nanti."); }
+  } catch (err) { say(err === "slow" ? "Tunggu sebentar sebelum mengirim lagi." : "Gagal mengirim. Coba lagi nanti."); }
 });
 render();
