@@ -58,6 +58,11 @@ function draw(t) {
 }
 draw(0); if (!reduce) requestAnimationFrame(draw);
 
+// ===== Modal QR donasi =====
+const qr = $("qr");
+$("donateBtn").addEventListener("click", () => qr.showModal());
+qr.addEventListener("click", e => { if (e.target === qr) qr.close(); });
+
 // ===== Perbesar gambar kode =====
 const lb = $("lb");
 document.querySelectorAll("[data-full]").forEach(b => b.addEventListener("click", () => { lb.querySelector("img").src = b.dataset.full; lb.showModal(); }));
