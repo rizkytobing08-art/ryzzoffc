@@ -11,6 +11,17 @@ function route() {
 }
 addEventListener("hashchange", route); route();
 
+// ===== Menu hamburger =====
+const menuBtn = $("menuBtn"), menuPanel = $("menuPanel");
+function closeMenu() { menuBtn.setAttribute("aria-expanded", "false"); menuPanel.classList.remove("open"); }
+menuBtn.addEventListener("click", () => {
+  const open = menuPanel.classList.toggle("open");
+  menuBtn.setAttribute("aria-expanded", String(open));
+});
+menuPanel.querySelectorAll("a").forEach(a => a.addEventListener("click", closeMenu));
+document.addEventListener("click", e => { if (!menuPanel.contains(e.target) && e.target !== menuBtn && !menuBtn.contains(e.target)) closeMenu(); });
+addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+
 // ===== Umur otomatis =====
 const now = new Date();
 let umur = now.getFullYear() - 2010;
@@ -46,9 +57,9 @@ function size() {
 addEventListener("resize", size); size();
 function draw(t) {
   g.clearRect(0, 0, W, H);
-  g.fillStyle = "#fff";
-  for (const s of S) { g.globalAlpha = .4 + .6 * Math.abs(Math.sin(t / 1000 + s.t)); g.fillRect(s.x, s.y, s.r, s.r); }
-  g.globalAlpha = .85; g.fillStyle = "#ffb7d5";
+  g.fillStyle = "#eceef2";
+  for (const s of S) { g.globalAlpha = .25 + .35 * Math.abs(Math.sin(t / 1000 + s.t)); g.fillRect(s.x, s.y, s.r, s.r); }
+  g.globalAlpha = .5; g.fillStyle = "#d9c9c0";
   for (const p of P) {
     if (!reduce) { p.y += p.vy; p.x += p.vx + Math.sin(p.a) * .5; p.a += p.va; }
     if (p.y > H + 20) Object.assign(p, petal(false));
