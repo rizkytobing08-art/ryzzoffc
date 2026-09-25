@@ -13,9 +13,20 @@
 </head>
 <body>
 <div id="sky"></div>
-<svg id="hills" viewBox="0 0 1440 300" preserveAspectRatio="none" aria-hidden="true"><path d="M0 220L120 140 220 200 360 90 500 210 650 130 800 220 960 110 1100 200 1250 120 1440 210V300H0Z" fill="#2b1b5e" opacity=".9"/><path d="M0 260Q180 190 360 250T720 240T1080 250T1440 230V300H0Z" fill="#120c30"/></svg>
+<svg id="hills" viewBox="0 0 1440 300" preserveAspectRatio="none" aria-hidden="true"><path d="M0 220L120 140 220 200 360 90 500 210 650 130 800 220 960 110 1100 200 1250 120 1440 210V300H0Z" fill="#232537" opacity=".9"/><path d="M0 260Q180 190 360 250T720 240T1080 250T1440 230V300H0Z" fill="#16171f"/></svg>
 <canvas id="net" aria-hidden="true"></canvas>
-<header><ul aria-label="Menu"><li><a href="#beranda">Beranda</a></li><li><a href="#tentang">Tentang</a></li><li><a href="#perjalanan">Perjalanan</a></li><li><a href="#kode">Kode</a></li><li><a href="#komentar">Komentar</a></li></ul></header>
+<header>
+  <button id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel" aria-label="Buka menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="menuPanel" aria-label="Menu utama">
+    <a href="#beranda">Beranda</a>
+    <a href="#tentang">Tentang</a>
+    <a href="#perjalanan">Perjalanan</a>
+    <a href="#kode">Kode</a>
+    <a href="#komentar">Komentar</a>
+  </nav>
+</header>
 
 <main>
   <section class="hero" id="beranda">
